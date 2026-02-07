@@ -19,7 +19,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 20px 10px;
+            overflow-x: hidden;
         }
 
         h1 {
@@ -127,18 +128,19 @@
             background-color: #5a5a5c;
             border: none;
             border-radius: 10px;
-            padding: 20px 10px;
+            padding: 5px;
             font-size: 1rem;
             font-weight: 700;
             color: #ffffff;
             cursor: pointer;
             transition: all 0.15s ease;
             text-transform: uppercase;
-            min-height: 80px;
+            aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
+            word-break: break-word;
         }
 
         .word-tile:hover {
@@ -293,13 +295,15 @@
 
         @media (max-width: 500px) {
             .word-tile {
-                padding: 15px 5px;
-                font-size: 0.8rem;
-                min-height: 60px;
+                font-size: 0.75rem;
             }
 
             h1 {
                 font-size: 1.8rem;
+            }
+
+            .game-grid {
+                gap: 6px;
             }
         }
     </style>
