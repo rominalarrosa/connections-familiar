@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections - Edición Familiar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121213;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #818384;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .mistakes {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .mistakes-dots {
+            display: inline-flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #5a5a5c;
+            border-radius: 50%;
+        }
+
+        .dot.active {
+            background-color: #ffffff;
+        }
+
+        .solved-categories {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .solved-category {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            animation: reveal 0.5s ease-out;
+        }
+
+        @keyframes reveal {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .solved-category.yellow {
+            background-color: #f9df6d;
+            color: #000;
+        }
+
+        .solved-category.green {
+            background-color: #a0c35a;
+            color: #000;
+        }
+
+        .solved-category.blue {
+            background-color: #b0c4ef;
+            color: #000;
+        }
+
+        .solved-category.purple {
+            background-color: #ba81c5;
+            color: #000;
+        }
+
+        .solved-category h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .solved-category p {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .word-tile {
+            background-color: #5a5a5c;
+            border: none;
+            border-radius: 10px;
+            padding: 20px 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .word-tile:hover {
+            background-color: #6a6a6c;
+        }
+
+        .word-tile.selected {
+            background-color: #5a5a5c;
+            border: 3px solid #ffffff;
+            transform: scale(0.95);
+        }
+
+        .word-tile.shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-shuffle {
+            background-color: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        .btn-shuffle:hover {
+            background-color: #ffffff;
+            color: #121213;
+        }
+
+        .btn-deselect {
+            background-color: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        .btn-deselect:hover {
+            background-color: #ffffff;
+            color: #121213;
+        }
+
+        .btn-submit {
+            background-color: #ffffff;
+            border: 2px solid #ffffff;
+            color: #121213;
+        }
+
+        .btn-submit:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-submit:disabled {
+            background-color: #3a3a3c;
+            border-color: #3a3a3c;
+            color: #818384;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-align: center;
+            min-height: 30px;
+        }
+
+        .message.error {
+            color: #ff6b6b;
+        }
+
+        .message.success {
+            color: #a0c35a;
+        }
+
+        .message.close {
+            color: #f9df6d;
+        }
+
+        .game-over {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .game-over h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .btn-restart {
+            background-color: #a0c35a;
+            border: none;
+            color: #000;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .btn-restart:hover {
+            background-color: #8ab34a;
+        }
+
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -20px;
+            width: 12px;
+            height: 12px;
+            opacity: 0;
+            animation: confetti-fall 3s ease-in forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg) scale(0.5);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .word-tile {
+                padding: 15px 5px;
+                font-size: 0.8rem;
+                min-height: 60px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>CONNECTIONS</h1>
+    <p class="subtitle">Edición Familiar 👨‍👩‍👧‍👦</p>
+
+    <div class="mistakes">
+        Errores restantes:
+        <span class="mistakes-dots">
+            <span class="dot active"></span>
+            <span class="dot active"></span>
+            <span class="dot active"></span>
+            <span class="dot active"></span>
+        </span>
+    </div>
+
+    <div class="solved-categories" id="solvedCategories"></div>
+
+    <div class="game-grid" id="gameGrid"></div>
+
+    <div class="controls">
+        <button class="btn btn-shuffle" onclick="shuffleWords()">Mezclar</button>
+        <button class="btn btn-deselect" onclick="deselectAll()">Deseleccionar</button>
+        <button class="btn btn-submit" id="submitBtn" onclick="submitGuess()" disabled>Enviar</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="game-over" id="gameOver" style="display: none;">
+        <h2 id="gameOverTitle"></h2>
+        <button class="btn-restart" onclick="restartGame()">Jugar de nuevo</button>
+    </div>
+
+    <script>
+        const categories = {
+            yellow: {
+                name: "Iniciales de los hombres Fogel",
+                words: ["E", "Y", "J", "S"],
+                color: "yellow"
+            },
+            green: {
+                name: "Marcas de yogur",
+                words: ["CONAPROLE", "YOGURISIMO", "CLALDY", "COLONIAL"],
+                color: "green"
+            },
+            blue: {
+                name: "Cosas para tirar a la parrilla mañana",
+                words: ["CHOCLOS", "BONIATOS", "CARNES", "MOLLEJAS"],
+                color: "blue"
+            },
+            purple: {
+                name: "👶 FELICIDADES ABUELOS 👶!!!",
+                words: ["VAMOS", "A", "SER", "PAPAS"],
+                color: "purple"
+            }
+        };
+
+        let allWords = [];
+        let selectedWords = [];
+        let solvedCategories = [];
+        let mistakes = 4;
+        let guessedWrong = [];
+
+        const initialOrder = [
+            "PAPAS", "YOGURISIMO", "CARNES", "S",
+            "E", "VAMOS", "J", "CONAPROLE",
+            "A", "BONIATOS", "CHOCLOS", "SER",
+            "CLALDY", "Y", "COLONIAL", "MOLLEJAS"
+        ];
+
+        function initGame() {
+            allWords = [...initialOrder];
+            renderGrid();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+
+            allWords.forEach(word => {
+                const tile = document.createElement('button');
+                tile.className = 'word-tile';
+                if (selectedWords.includes(word)) {
+                    tile.classList.add('selected');
+                }
+                tile.textContent = word;
+                tile.onclick = () => toggleWord(word);
+                grid.appendChild(tile);
+            });
+        }
+
+        function toggleWord(word) {
+            const index = selectedWords.indexOf(word);
+            if (index > -1) {
+                selectedWords.splice(index, 1);
+            } else if (selectedWords.length < 4) {
+                selectedWords.push(word);
+            }
+            renderGrid();
+            updateSubmitButton();
+        }
+
+        function updateSubmitButton() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = selectedWords.length !== 4;
+        }
+
+        function shuffleWords() {
+            shuffleArray(allWords);
+            renderGrid();
+        }
+
+        function deselectAll() {
+            selectedWords = [];
+            renderGrid();
+            updateSubmitButton();
+        }
+
+        function submitGuess() {
+            const guessKey = [...selectedWords].sort().join('|');
+
+            if (guessedWrong.includes(guessKey)) {
+                showMessage("Ya intentaste esta combinación", "error");
+                return;
+            }
+
+            let oneAway = false;
+
+            for (const key in categories) {
+                const category = categories[key];
+                const categoryWords = category.words;
+
+                const matches = selectedWords.filter(w => categoryWords.includes(w)).length;
+
+                if (matches === 4) {
+                    // Correct!
+                    solvedCategories.push(category);
+                    allWords = allWords.filter(w => !categoryWords.includes(w));
+                    selectedWords = [];
+                    renderSolvedCategory(category);
+                    renderGrid();
+                    updateSubmitButton();
+
+                    if (category.color === 'purple') {
+                        launchConfetti();
+                    }
+
+                    if (solvedCategories.length === 4) {
+                        setTimeout(() => {
+                            showGameOver(true);
+                        }, 500);
+                    }
+                    return;
+                } else if (matches === 3) {
+                    oneAway = true;
+                }
+            }
+
+            // Wrong guess
+            guessedWrong.push(guessKey);
+
+            // Si queda 1 vida, no restar ni eliminar
+            if (mistakes === 1) {
+                // Shake animation
+                document.querySelectorAll('.word-tile.selected').forEach(tile => {
+                    tile.classList.add('shake');
+                    setTimeout(() => tile.classList.remove('shake'), 500);
+                });
+                showMessage("Bueno, una chance más 😅", "close");
+                return;
+            }
+
+            mistakes--;
+            updateMistakes();
+
+            // Shake animation
+            document.querySelectorAll('.word-tile.selected').forEach(tile => {
+                tile.classList.add('shake');
+                setTimeout(() => tile.classList.remove('shake'), 500);
+            });
+
+            if (oneAway) {
+                showMessage("¡Estás a una!", "close");
+            } else {
+                showMessage("Incorrecto, intenta de nuevo", "error");
+            }
+        }
+
+        function updateMistakes() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index < mistakes) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function renderSolvedCategory(category) {
+            const container = document.getElementById('solvedCategories');
+            const div = document.createElement('div');
+            div.className = `solved-category ${category.color}`;
+            const wordsText = category.color === 'purple'
+                ? 'VAMOS A SER PAPAS ❤️'
+                : category.words.join(', ');
+            div.innerHTML = `
+                <h3>${category.name}</h3>
+                <p>${wordsText}</p>
+            `;
+            container.appendChild(div);
+        }
+
+        function revealAllCategories() {
+            const order = ['yellow', 'green', 'blue', 'purple'];
+            order.forEach(key => {
+                const category = categories[key];
+                if (!solvedCategories.includes(category)) {
+                    solvedCategories.push(category);
+                    renderSolvedCategory(category);
+                }
+            });
+            allWords = [];
+            renderGrid();
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            setTimeout(() => {
+                msg.textContent = '';
+                msg.className = 'message';
+            }, 2000);
+        }
+
+        function showGameOver(won) {
+            const gameOver = document.getElementById('gameOver');
+            const title = document.getElementById('gameOverTitle');
+            gameOver.style.display = 'block';
+            title.textContent = won ? '🎉 ¡Felicitaciones! 🎉' : '😅 ¡Próxima vez será!';
+            document.querySelector('.controls').style.display = 'none';
+        }
+
+        function restartGame() {
+            stopConfetti();
+            selectedWords = [];
+            solvedCategories = [];
+            mistakes = 4;
+            guessedWrong = [];
+
+            document.getElementById('solvedCategories').innerHTML = '';
+            document.getElementById('gameOver').style.display = 'none';
+            document.querySelector('.controls').style.display = 'flex';
+            document.getElementById('message').textContent = '';
+
+            updateMistakes();
+            initGame();
+        }
+
+        let confettiInterval = null;
+
+        function launchConfetti() {
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            container.id = 'confettiContainer';
+            document.body.appendChild(container);
+
+            const colors = ['#f9df6d', '#a0c35a', '#b0c4ef', '#ba81c5', '#ff6b6b', '#ffffff', '#ffa500'];
+
+            function spawnBatch() {
+                for (let i = 0; i < 15; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    piece.style.width = (Math.random() * 10 + 6) + 'px';
+                    piece.style.height = (Math.random() * 10 + 6) + 'px';
+                    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    container.appendChild(piece);
+                    piece.addEventListener('animationend', () => piece.remove());
+                }
+            }
+
+            spawnBatch();
+            confettiInterval = setInterval(spawnBatch, 500);
+        }
+
+        function stopConfetti() {
+            if (confettiInterval) {
+                clearInterval(confettiInterval);
+                confettiInterval = null;
+            }
+            const container = document.getElementById('confettiContainer');
+            if (container) container.remove();
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
